@@ -177,11 +177,11 @@ def build_deck(
             raise NoLegalDeck(
                 f"{archetype} has only {len(engine_cards)} legal main-deck cards, "
                 f"filling at most {len(engine_cards) * MAX_COPIES} of the {floor} "
-                f"slots reserved for the archetype's own engine"
+                f"main-deck slots this tool reserves for an archetype's own engine"
                 + (f" ({banned} of its cards are Link or Pendulum monsters, which "
                    f"Genesys bans)" if banned else "")
-                + ". The rest would be generic staples, not a "
-                f"{archetype} deck.",
+                + f". The rest would be generic staples, not a {archetype} deck. "
+                f"The engine floor is this tool's build policy, not a Genesys rule.",
                 {
                     "archetype": archetype,
                     "legal_archetype_cards": len(engine_cards),
