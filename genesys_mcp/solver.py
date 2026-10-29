@@ -166,6 +166,31 @@ def build_deck(
             },
         )
 
+    if archetype:
+        engine_cards = [c for c in main_pool if c.archetype == archetype]
+        floor = int(main_size * ARCHETYPE_FLOOR)
+        banned = sum(
+            1 for c in pool
+            if c.archetype == archetype and not c.is_genesys_legal
+        )
+        if len(engine_cards) * MAX_COPIES < floor:
+            raise NoLegalDeck(
+                f"{archetype} has only {len(engine_cards)} legal main-deck cards, "
+                f"filling at most {len(engine_cards) * MAX_COPIES} of the {floor} "
+                f"slots reserved for the archetype's own engine"
+                + (f" ({banned} of its cards are Link or Pendulum monsters, which "
+                   f"Genesys bans)" if banned else "")
+                + ". The rest would be generic staples, not a "
+                f"{archetype} deck.",
+                {
+                    "archetype": archetype,
+                    "legal_archetype_cards": len(engine_cards),
+                    "engine_capacity": len(engine_cards) * MAX_COPIES,
+                    "engine_slots_required": floor,
+                    "banned_as_link_or_pendulum": banned,
+                },
+            )
+
     main: dict[int, int] = {}
     extra: dict[int, int] = {}
     by_id: dict[int, Card] = {}

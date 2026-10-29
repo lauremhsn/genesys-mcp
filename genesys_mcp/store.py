@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,7 +49,7 @@ class DeckExistsError(ValueError):
 class DeckStore:
     def __init__(self, path: Path | None = None):
         self._path = path or DB_PATH
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             conn.executescript(SCHEMA)
 
     def _connect(self) -> sqlite3.Connection:
@@ -100,7 +101,7 @@ class DeckStore:
     ) -> dict:
         spent = self.validate(main, extra, point_cap)
 
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             existing = conn.execute(
                 "SELECT id FROM decks WHERE name = ?", (name,)
             ).fetchone()
@@ -140,7 +141,7 @@ class DeckStore:
         }
 
     def list_decks(self) -> list[dict]:
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             rows = conn.execute(
                 "SELECT name, archetype, point_cap, points_spent, created_at"
                 " FROM decks ORDER BY created_at DESC"
@@ -148,7 +149,7 @@ class DeckStore:
         return [dict(r) for r in rows]
 
     def load(self, name: str) -> dict | None:
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             deck = conn.execute("SELECT * FROM decks WHERE name = ?", (name,)).fetchone()
             if deck is None:
                 return None
@@ -169,6 +170,6 @@ class DeckStore:
         }
 
     def delete(self, name: str) -> bool:
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             cursor = conn.execute("DELETE FROM decks WHERE name = ?", (name,))
         return cursor.rowcount > 0
